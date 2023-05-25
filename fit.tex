@@ -36,7 +36,7 @@
 % 所属番号を \affmark でつける
 \jauthors{%
   桂　辰弥\affmark{1} &
-  竹内　孔一\affmark{2}
+  竹内　孔一\affmark{1}
 }
 
 % 欧文著者名：著者名間に & を書く
@@ -48,41 +48,19 @@
 % 所属
 % \affmark でつけた番号毎に指定
 \afftext{1}{岡山大学}
-\afftext{2}{岡山大学}
+
 
 \begin{document}
 
 \maketitle
 
-\section{はじめに}
+\section{研究背景}
 
 
-\subsection{p\LaTeX~/ up\LaTeX で使う場合}
 
-作成者は基本的にLua\LaTeX を使っているため、
-うまく動かないことがあるかもしれません。
-
-\begin{itemize}
-  \item p\LaTeX またはup\LaTeX
-  \item jlreq.cls
-        \begin{itemize}
-          \item 2018/04/11 以降が必要です。
-                \begin{itemize}
-                  \item \TeX~Live 2018初版に収録されているものは古くてダメですが
-                        \TeX~Live 2018 frozenや\TeX~Live 2019なら大丈夫です。
-                \end{itemize}
-        \end{itemize}
-  \item 各種フォント（本クラスファイルのデフォルト設定で使用するフォント）
-        \begin{itemize}
-          \item newtx
-          \item \TeX~Gyre Terms
-          \item \TeX~Gyre Heros
-          \item \TeX~Gyre Cursor
-        \end{itemize}
-\end{itemize}
-
-\section{書き方}
-
+\section{パターンマッチシステムの概要}
+\section{評価実験}
+\section{考察と結論}
 ソースファイルの書き方の概要を説明します。
 実際の書き方の例は、
 本サンプルのソースファイルsample.texや、
@@ -113,7 +91,6 @@
 2段目の指定があれば2段とも出力されます。
 2段のサンプルはsample2.texをご覧ください。
 
-\subsection{所属}
 
 和文著者のところで、
 各著者名に\texttt{\textbackslash af\mbox{}fmark}で所属番号を付けます。
