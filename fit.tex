@@ -62,36 +62,37 @@
 しかしSketch Engineは,コーパスベースの言語分析や統計的な情報抽出が主な役割であるため，
 テキスト中から依存関係解析を持つ表現を抽出する際には前処理が必要となる．
 
-ユーザ自らがこれらを考慮してテキスト中の特定フレーズや表現を抽出するようなシステムを構築することは容易ではない．そこで本研究では解析モジュールで解析した結果をユーザ自身が求める表現をあらかじめ用意された検索ブロックで組み合わせてシステムに投入し，事例を検索できるシステムの開発を行っている．先行研究　においてWEBアプリケーションとしてJavaScriptとPythonを利用した基本システムを構築したが，
-システムの本格利用にはいくつかの課題が残されている．そこで本報告では検索エンジンの中心部分であるPrologデータベースの実装の改良，および、大規模なテキストが扱えるためにデータベースをシステムに導入したので、この改良について報告する．
+ユーザ自らがこれらを考慮してテキスト中の特定フレーズや表現を抽出するようなシステムを構築することは容易ではない．そこで本研究では解析モジュールで解析した結果をユーザ自身が求める表現をあらかじめ用意された検索ブロックで組み合わせてシステムに投入し，事例を検索できるシステムの開発を行っている．先行研究においてWEBアプリケーションとしてJavaScriptとPythonを利用した基本システムを構築したが，
+システムの本格利用にはいくつかの課題が残されている．そこで本報告では検索エンジンの中心部分であるPrologデータベースの実装の改良，および，大規模なテキストが扱えるためにデータベースをシステムに導入したので、この改良について報告する．
 
 
-\section{提案する言語パターンマッチシステム}
-本章では提案する言語パターンマッチシステムを構築している環境についての概要と処理の流れについて述べる．
+\section{提案するパターンマッチシステムの概要}
+本章では開発したパターンマッチシステムを構築する環境と実際のシステムの処理の流れについて述べる．
+また先行研究との大きな変更点であるPrologデータベースの実装の改良，および，大規模なテキストが扱えるためにデータベースをシステムに導入についても触れている．
+
+\subsection{提案するパターンマッチシステムの構成}
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.4]{fig/system_fig.png}
   \caption{システムの構成図}
   \label{fig:sys}
 \end{figure}
-\subsection{言語パターンマッチシステムの概要}
+
 本システムは図\ref{fig:sys}のようにユーザが視覚的に操作を行うフロントエンドシステムとユーザが要求したテキストの処理バックエンドシステムに切り分けて構成している．
+
 フロントエンドシステムはJavascriptのライブラリであるReact.jsで構成されており
 主な機能としてはテキストファイルのアップロード，検索する言語パターンの構築，解析結果の表示，検索結果の表示などがある．
 
 バックエンドシステムはPythonのWebフレームワークであるDjangoとデータベースシステムであるElasticsearchで構成されており，
 主な機能としてはテキストファイルの解析，ユーザが構築した検索クエリの言語パターンマッチ実行などがある．
 
+
+
 詳しい処理の流れについては以降の節で述べる．
 
-\subsection{処理の流れについて}
-バックエンドで行われるテキスト解析，言語パターンマッチ実行の際の処理の流れについてそれぞれ説明する．
-
-テキストの解析の処理はユーザがアップロードしたテキストファイルの文にASA{}を用いて形態素解析，係り受け解析，項構造解析を適応させる．解析した結果の文の木構造を図\ref{fig:tree}に示す．
-その後Prolog述語に変換を行い，データベースに保存する．変換するProlog述語は以下の表\ref{tbl:predicates}ように定義しており．図\ref{fig:prolog}のように変換される．
-言語パターンマッチの処理はユーザが構築した検索パターンを送信し，データベースから各文に対応するPrologを取得し，Prologパターンマッチを実行する．
-パターンマッチを実行するProlog処理系としてSWI-Prologのpythonモジュールであるpyswipを使用している．
-
+\subsection{バックエンドの処理の流れについて}
+バックエンドの処理の流れとしてテキスト解析，言語パターンマッチ実行の処理についてそれぞれ説明する．
 
 \begin{figure}[htbp]
   \centering
@@ -101,23 +102,23 @@
 \end{figure}
 \begin{table}[htbp]
   \caption{Prologの述語一覧}
-  {\small
+  {\footnotesize
   \begin{center}
-    \begin{tabular}{|l||l|l|}\hline
-      述語                         &  第2引数   & 第3引数               \\
+    \begin{tabular}{|l|l|l|l|}\hline
+      述語                    &第1引数     &  第2引数   & 第3引数               \\
       \hline 
 
-      chunk(SENTENCE\_ID, 0,\_)           &  根ノード ID& 文節 ID                   \\
-      morph(SENTENCE\_ID, \_, \_)      & 文節 ID& 形態素 ID                \\
-      main(SENTENCE\_ID, \_, \_)         &文節 ID & 主形態素 \\
-      part(SENTENCE\_ID, \_, \_)         &文節 ID& 副形態素\\
-      role(SENTENCE\_ID, \_, \_)         &文節 ID& 意味役割  \\
-      semantic(SENTENCE\_ID, \_, \_)     &文節 ID & 概念\\
-      surf(SENTENCE\_ID, \_, \_)          &ノード ID& ノードの表層\\               
-      surfBF(SENTENCE\_ID, \_, \_)       &形態素 ID& 形態素の基本形        \\
-      sloc(SENTENCE\_ID, \_, \_)&文節／形態素 ID & 出現位置\\
-      pos(SENTENCE\_ID, \_, \_)          &形態素 ID& 品詞\\                                        
-      dep(SENTENCE\_ID, \_, \_)        &文節 ID & 文節 ID\\
+      chunk(\_, 0,\_)       &文番号    &  0固定& 文節 ID                   \\
+      morph(\_, \_, \_)     &文番号 & 文節 ID& 形態素 ID                \\
+      main(\_, \_, \_)      &文番号   &文節 ID & 主形態素 \\
+      part(\_, \_, \_)      &文番号   &文節 ID& 副形態素\\
+      role(\_, \_, \_)      &文番号   &文節 ID& 意味役割  \\
+      semantic(\_, \_, \_)   &文番号  &文節 ID & 概念\\
+      surf(\_, \_, \_)        &文番号  &ノード ID& 表層\\               
+      surfBF(\_, \_, \_)      &文番号 &形態素 ID& 基本形        \\
+      sloc(\_, \_, \_)  &文番号&文節／形態素 ID & 文中出現位置\\
+      pos(\_, \_, \_)    &文番号      &形態素 ID& 品詞\\                                        
+      dep(\_, \_, \_)     &文番号   &文節 ID & 係り受け文節 ID\\
         \hline
     \end{tabular}
   
@@ -125,34 +126,172 @@
   \end{center}
   }
 \end{table}
+
+テキスト解析の処理はユーザがテキストファイルのアップロードを行うことで実行される．送られたテキストファイルの文にASA{}を用いて形態素解析，係り受け解析，項構造解析を適応させる．解析した結果の文の木構造を図\ref{fig:tree}に示す．
+その後Prolog述語に変換を行い，データベースに保存する．変換するProlog述語は以下の表\ref{tbl:predicates}のように定義している．%図\ref{fig:prolog}のように変換される．
+
+ASAで解析したデータがJSON形式であるため，Elasticsearchをデータベースとして活用することで，
+JSON形式の大規模な解析データの柔軟な取り扱いや高速な検索，リアルタイムな更新，スケーラビリティ，高度な分析など，データベースとしての利点を最大限に生かすことができる．
+
+
+
+言語パターンマッチの処理はフロントエンドからユーザが構築した検索パターンが送られるとデータベースから各文に対応するPrologを取得し，Prologパターンマッチが実行される．
+パターンマッチを実行するProlog処理系としてSWI-Prologのpythonモジュールであるpyswipを使用している．
+Prolog処理系として採用したSWI-PrologはCで書かれた高機能のProlog処理系であり，
+SWI-Prologの強力な論理プログラミング機能とPythonのデータ処理能力を組み合わせることで，高速でより拡張性の高い環境が提供される．
+
+また先行研究のシステムとのバックエンドの大きな改良点としては
+バックエンド側でデータベースに保存する際に，以前は全文の解析データを１つのデータとして保存していたが，このために保存できる解析データに制限がかかってしまっていたため，
+1文ごとに対応した解析データを保存するように改良を行った．
+またデータベースの取得を1文ずつPrologデータベースの処理を行い，マッチ解の生成を行うように改良した．
+
+
+
+
+
+%\begin{figure}[htbp]
+ % \centering
+  %\includegraphics[scale=0.5]{fig/prolog_data.png}
+  %\caption{変換されたprolog}
+  %\label{fig:prolog}
+%\end{figure}
+
+
+\subsection{フロントエンドの表示機能について}
+次にフロントエンドでの解析結果，検索クエリとなる言語パターンの構築，検索結果の表示について説明する．
+
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.5]{fig/prolog_data.png}
-  \caption{システムの構成図}
-  \label{fig:prolog}
+  \includegraphics[scale=0.4]{fig/convert_result_prolog.png}
+  \caption{解析結果の例}
+  \label{fig:show_prolog}
 \end{figure}
 
-次に
-\section{評価実験}
+
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.6]{fig/wo.png}
+  \caption{「ヲ格と動詞」の検索パターン}
+  \label{fig:wo_block}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.4]{fig/KWIC_result.png}
+  \caption{KWIC表示}
+  \label{fig:KWIC}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.4]{fig/table_result.png}
+  \caption{テーブル表示}
+  \label{fig:table}
+\end{figure}
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[scale=0.4]{fig/acsent_result.png}
+  \caption{強調表示}
+  \label{fig:acsent}
+\end{figure}
+
+フロントエンドはテキスト解析の処理終了後，解析結果をデータベースから取得して表示できる．以下の図\ref{fig:show_prolog}は解析結果の表示例である．
+
+先行研究のシステムとの変更点として，
+１文ごとに対応した解析データを保存するようにデータベースに保存する変更を行ったため，解析データの表示の際にはクリックした文の解析データがそれぞれ取得するように改良を行った．
+
+言語パターンを構築する際にはBlocklyを用いて生成できる．
+前節で示したProlog述語のブロックをユーザが自ら組み合わせることで，複雑な検索クエリを構築することができる.
+図\ref{fig:wo_block}はその例である．検索実行後，バックエンドから検索結果を受信し，結果の表示の際にはKWIC,テーブル，強調の3つの表示形式を用いることができる．
+以下の図\ref{fig:KWIC}，\ref{fig:table}，\ref{fig:acsent}は図\ref{fig:wo_block}の検索結果の表示例である．
+引数\textit{Wo\_Slock},\textit{Verb\_Slock}は文中での出現位置を示しており，検索パターンの引数に\textit{\_slock}を含む場合と表示形式で強調する要素を選択できるようになる．
+図\ref{fig:KWIC}は「ヲ格」，図\ref{fig:acsent}は「動詞」の要素を強調して表示し，視覚的にわかりやすくなっている．
+
+
+
+
+\section{動作評価実験}
+システムの動作評価実験を行い，パターンマッチシステムの処理性能の向上の確認を行う．
 
 \subsection{実験内容}
-\subsection{結果}
 \begin{table}[htbp]
   \centering
-    \caption{パターンマッチの検索時間(秒)}
-    \label{pattern_result}
-    \begin{tabular}{|l||r|r|}  
+    \caption{ファイルサイズ(バイト)}
+    \label{fig:tex}
+    \begin{tabular}{|l||r|}  
       \hline
-      文の数 & 検索時間\\ \hline \hline
-      1 & 0.110\\\hline
-      10 &  0.531\\\hline
-      100 & 5.54\\ \hline
-      1000 &  60 \\\hline
-      5000 &  312\\\hline
-      10000 &  620\\ \hline
+      文の数 & ファイルサイズ\\ \hline \hline
+      1 & 46\\\hline
+      10 & 440 \\\hline
+      100 & 5,342\\ \hline
+      1000 & 53,248 \\\hline
+      5000 &  262,199 \\\hline
+      10000 &  524,399\\ \hline
     \end{tabular}
   \end{table}
-\section{考察と結論}
+
+図\ref{fig:convert_time}に示すテキストファイルを用意し，
+テキスト解析とパターンマッチを行い，これらの処理時間を先行研究のシステムと提案するパターンマッチシステムでそれぞれ計測した．
+具体的にはフロントエンドからバックエンドに送信し，バックエンドからデータが返ってくるまでを処理時間として計測する．
+これらの処理時間はChromeのデベロッパーツールを用いて計測を行う．
+検索クエリは図\ref{fig:wo_block}の「ヲ格と動詞」の言語パターンを用いる．
+
+
+\subsection{実験結果}
+
+\begin{table}[htbp]
+  \centering
+    \caption{テキスト解析の処理時間(秒)}
+    \label{fig:convert_time}
+    \begin{tabular}{|r||r|r|}  
+      \hline
+      文の数 &先行研究のシステム& 提案するシステム \\\hline \hline
+      1 & 0.140&0.144\\\hline
+      10 & 0.442&0.403 \\\hline
+      100 & 1.47 &3.56\\ \hline
+      1000 & 28.9&36.4 \\\hline
+      5000 &  144&192\\\hline
+      10000 &  計測不能&768\\ \hline
+    \end{tabular}
+  \end{table}
+\begin{table}[htbp]
+  \centering
+    \caption{パターンマッチの処理時間(秒)}
+    \label{fig:matching_time}
+    \begin{tabular}{|l||r|r|}  
+      \hline
+      文の数 & 先行研究のシステム& 提案するシステム\\ \hline \hline
+      1 & 0.110&0.242\\\hline
+      10 & 0.531 &0.495\\\hline
+      100 & 2.41&1.65\\ \hline
+      1000 & 37.1 &30.9 \\\hline
+      5000 & 98.2 &78.4\\\hline
+      10000 & 計測不能 &160\\ \hline
+    \end{tabular}
+  \end{table}
+
+
+  パターンマッチの動作評価実験の結果をそれぞれ表\ref{fig:convert_time}，\ref{fig:matching_time} に示す．
+  テキスト解析，パターンマッチ実行はともに文の数が増えるにつれ，処理時間も増加していることが読み取れる．
+  テキスト解析の処理時間は先行研究のシステムに比べ，少し遅くなったが，
+  先行研究のシステムは10000文を解析できなかったが，提案するパターンマッチシステムは解析可能となり，パターンマッチ実行処理も確認できた．
+  これらの結果からシステムの処理性能の向上が確認できた．
+  
+\subsection{考察}
+  テキスト解析の処理時間は先行研究のシステムに比べ，少し遅くなったが，これはデータベースを1文ごとに対応した解析データを保存するように改良を行ったためであり，
+  10000文を解析を行った際には10000個の解析データを保存する必要があるため，バックエンドでのDjangoとデータベースシステムとのやりとりの時間が増加してしたためである．
+
+
+  Elasticsearchは、1度に取得することができるドキュメントの最大件数は、デフォルトでは10,000件であるためであり，
+  10000文以上のテキストファイルの解析は現状のシステムでは不可能である．
+  提案するパターンマッチシステムは10000文を解析可能となったが，さらに解析後のブラウザの挙動がかなり重くなっており，
+  ユーザが利用可能とは言い難い．
+  今後さらに処理性能の向上させるには，パフォーマンスの問題やネットワークの制約などに留意して実装する必要となる．
+
+  また今回の実装では1文
+
+
+\section{まとめ}
 
 \acknowledgment{%
   謝辞の文章を\texttt{\textbackslash acknowledgment}で指定します。
