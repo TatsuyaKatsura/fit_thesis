@@ -18,7 +18,8 @@
 
 % 図の貼り込み用
 \usepackage{graphicx}
-
+\usepackage{url}
+\usepackage{comment} 
 % 最終ページで両カラムの下端を揃える
 %\usepackage[balance]{nidanfloat}
 \usepackage{flushend}
@@ -62,11 +63,11 @@ Okayama University}
 \section{はじめに}
 テキスト中の特定のフレーズや表現を見つけることは，言語および教育分野において必要となることがある．テキストデータから特定のキーワードやフレーズの出現位置や文脈を抽出するためのプログラムとしてコンコーダンサがある．コンコーダンサは語学学習において特定のフレーズや表現の使用例を実際の文脈で把握することで，語彙や文法の理解、単語の使用法や文脈の把握に役立ち，学習者の語彙や表現力の向上に役立つ．
 パターンマッチングはテキストの表層で検索を行う正規表現とは異なり，情報を抽出したい文を対象に予め関係する文や文の一部に対応する文構造のパターンを用意し，そのパターンに合致する結果を取得するものである．
-有名なコンコーダンサの例として，Sketch Engineがある．Sketch Engine\footnote{https://www.sketchengine.eu/},はクエリ言語としてCQL（Corpus Query Language）\footnote{https://www.sketchengine.eu/documentation/corpus-querying/}が使用されており，コーパス内で正規表現や演算子を組み合わせることでパターンマッチを行うことができる．
+有名なコンコーダンサの例として，Sketch Engineがある．Sketch Engine\footnote{https://www.sketchengine.eu/},はクエリ言語としてCQL\footnote{https://www.sketchengine.eu/documentation/corpus-querying/}が使用されており，コーパス内で正規表現や演算子を組み合わせることでパターンマッチを行うことができる．
 しかしSketch Engineは,コーパスベースの言語分析や統計的な情報抽出が主な役割であるため，
 テキスト中から依存関係解析を持つ表現を抽出する際には前処理が必要となる．
-
-ユーザ自らがこれらを考慮してテキスト中の特定フレーズや表現を抽出するようなシステムを構築することは容易ではない．そこで本研究では解析モジュールで解析した結果をユーザ自身が求める表現をあらかじめ用意された検索ブロックで組み合わせてシステムに投入し，事例を検索できるシステムの開発を行っている．先行研究においてWEBアプリケーションとしてJavaScriptとPythonを利用した基本システムを構築したが，
+他にパターンマッチツールとしては，StruAP\cite{struAP:2017}があり，構文解析された木係り受け構造を利用し、部分木パターンによる関係抽出を行うことができるツールである．ただし日立が開発した商用製品で，一般利用できない．
+ユーザ自らがこれらを考慮してテキスト中の特定フレーズや表現を抽出するようなシステムを構築することは容易ではない．そこで本研究では解析モジュールで解析した結果をユーザ自身が求める表現をあらかじめ用意された検索ブロックで組み合わせてシステムに投入し，事例を検索できるシステムの開発を行っている．先行研究\cite{okada:2022}\cite{ogasawara:2022}においてWEBアプリケーションとしてJavaScriptとPythonを利用した基本システムを構築したが，
 システムの本格利用にはいくつかの課題が残されている．そこで本報告では検索エンジンの中心部分であるPrologデータベースの実装の改良，および，大規模なテキストが扱えるためにデータベースをシステムに導入したので,この改良について報告する．
 
 
@@ -135,7 +136,7 @@ Okayama University}
 その後Prolog述語に変換を行い，データベースに保存する．データベースに保存する際には，1文ごとに対応した解析データを保存している．
 変換するProlog述語は以下の表\ref{tbl:predicates}のように定義している．%図\ref{fig:prolog}のように変換される．
 
-ASAで解析したデータがJSON形式であるため，Elasticsearchをデータベースとして活用することで，
+ASA\footnote{https://github.com/Takeuchi-Lab-LM/python\_asa/}で解析したデータがJSON形式であるため，Elasticsearchをデータベースとして活用することで，
 JSON形式の大規模な解析データの柔軟な取り扱いや高速な検索，リアルタイムな更新，スケーラビリティ，高度な分析など，データベースとしての利点を最大限に生かすことができる．
 
 
@@ -326,14 +327,19 @@ SWI-Prologの強力な論理プログラミング機能とPythonのデータ処�
   また，大規模なテキストが扱えるためにデータベースとしてElasticsearchをシステムに導入した．
   実装した機能の処理性能を確認するための動作評価実験を行い，10000文のテキストの動作することが確認できた．
   また今後の課題としてさらなる処理性能の向上と正規表現マッチの追加が考えられる．
+
+
+
 \acknowledgment{%
   謝辞の文章を\texttt{\textbackslash acknowledgment}で指定します。
   使わなければ謝辞は出力されません。
 }
 
-\bibliographystyle{unsrt}
 
-\bibliography{all,my-results}
+\bibliography{biblio.bib}
+\bibliographystyle{junsrt}
+%\bibliographystyle{unsrt}
 
+%\bibliography{all,my-results}
 
 \end{document}
