@@ -185,17 +185,19 @@ SWI-Prologの強力な論理プログラミング機能とPythonのデータ処�
   \caption{「ヲ格と動詞」の言語パターン}
   \label{fig:wo_block}
 \end{figure}
-\begin{figure}[htbp]
-  \centering
-    \includegraphics[width=0.4\textwidth]{fig/KWIC_result.png}
-    \caption{KWIC表示}
-    \label{fig:KWIC}
-\end{figure}
+
 \begin{figure}[htbp]
   \centering
   \includegraphics[width=0.4\textwidth]{fig/table_result.png}
   \caption{テーブル表示}
   \label{fig:table}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+    \includegraphics[width=0.4\textwidth]{fig/KWIC_result.png}
+    \caption{KWIC表示}
+    \label{fig:KWIC}
 \end{figure}
 
 
@@ -212,8 +214,8 @@ SWI-Prologの強力な論理プログラミング機能とPythonのデータ処�
 
 言語パターンを構築するにはBlockly\footnote{https://developers.google.com/blockly?hl=ja}で定義されたブロックを利用する．
 前節で示したProlog述語のブロックをユーザが自ら組み合わせることで，複雑な検索クエリを構築することができる.
-図\ref{fig:wo_block}に例を示す．パターンマッチを実行するとバックエンドから検索結果を受け取り，結果を表示する．表示の際にはKWIC,テーブル，強調の3つの表示形式を選択することができる．
-以下の図\ref{fig:KWIC}，\ref{fig:table},\ref{fig:acsent}，は図\ref{fig:wo_block}の検索結果の表示例である．
+図\ref{fig:wo_block}に例を示す．パターンマッチを実行するとバックエンドから検索結果を受け取り，結果を表示する．表示の際にはテーブル，KWIC,強調の3つの表示形式を選択することができる．
+以下の図\ref{fig:table}，\ref{fig:KWIC},\ref{fig:acsent}，は図\ref{fig:wo_block}の検索結果の表示例である．
 引数\textit{Wo\_Slock},\textit{Verb\_Slock}は文中での出現位置を示しており，検索パターンの引数に\textit{\_Slock}を含む場合と表示形式で強調する要素を選択できるようになる．
 図\ref{fig:KWIC}は「ヲ格」，図\ref{fig:acsent}は「動詞」の要素を強調して表示することで視覚的にわかりやすくしている．
 
